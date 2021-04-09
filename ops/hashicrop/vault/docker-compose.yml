@@ -1,0 +1,13 @@
+version: "2"
+services:
+  vault:
+    image: vault:1.1.3
+    volumes:
+        - ${PWD}/file:/vault/file
+        - ${PWD}/logs:/vault/logs
+        - ${PWD}/config:/vault/config
+    command: "server"
+    cap_add: 
+      - IPC_LOCK  #--cap-add: Add Linux capabilities,  in order for Vault to lock memory
+    ports:
+        - 8200:8200  

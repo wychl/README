@@ -1,0 +1,16 @@
+Path: helloworld.yaml
+Gateway: helloworld-gateway
+Services: 
+- Name: hello-world
+  Gateway: helloworld-gateway
+  ServicePorts:
+  - Name: http
+    Port: 80
+    Protocol: TCP
+    TargetPort: 8080
+  Containers: 
+  - name: hello-world
+    Image: wanyanchengli/helloworld:v1
+    Version: v1
+    Ports: 
+    - 8080

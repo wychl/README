@@ -1,0 +1,52 @@
+# 网关配置,为HTTP/TCP流量配置负载均衡器
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: helloworld-gateway #网关名称
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port: #80端口代理配置
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts: #公开的主机列表
+    - uk.bookinfo.com
+    - eu.bookinfo.com
+    tls:
+      httpsRedirect: true #负载均衡器会给所有http连接发送301转向指令，要求客户端使用 HTTPS
+  - port:
+      number: 443
+      name: https-443
+      protocol: HTTPS
+    hosts:
+    - uk.bookinfo.com
+    - eu.bookinfo.com
+    tls: #tls配置
+      mode: SIMPLE #这一字段的值决定了如何使用 TLS
+      serverCertificate: /etc/certs/servercert.pem #指定了服务端的TLS证书
+      privateKey: /etc/certs/privatekey.pem #指定了服务端的TLS密钥。
+      caCertificates: /etc/certs/xx.ca #用于验证客户端证书的ca证书
+      subjectAltNames: #验证客户端证书的一组认证主体名称
+        - xx
+  - port: # 在9443端口启用https
+      number: 9443
+      name: https-9443
+      protocol: HTTPS
+    hosts:
+    - xxx.com
+
+#代理服务器使用的 TLS 模式。
+#SIMPLE：标准TLS加密连接；
+#MUTUAL通过提供客户端证书进行身份验证，并使用双向 TLS 加密与上游的连接；
+#PASSTHROUGH基于客户端提供的SNI字符串选择上游服务器进行转发。    
+    tls:
+      mode: SIMPLE 
+      credentialName: xxx-secret  #从Kubernetes secret获取certs
+  - port: #配置mongo协议网关
+      number: 2379 
+      name: mongo
+      protocol: MONGO
+    hosts:
+    - "*"

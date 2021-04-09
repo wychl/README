@@ -1,0 +1,32 @@
+---
+kibana_version: "7.x"
+
+kibana_package: kibana
+kibana_package_state: present
+
+kibana_service_state: started
+kibana_service_enabled: true
+
+kibana_config_template: kibana.yml.j2
+kibana_config_dir: /etc/kibana
+kibana_config_file_path: /etc/kibana/kibana.yml
+
+kibana_server_port: 5601
+kibana_server_host: "0.0.0.0"
+
+kibana_elasticsearch_url: "http://localhost:9200"
+kibana_elasticsearch_username: ""
+kibana_elasticsearch_password: ""
+
+kibana_use_repository: false
+kibana_custom_package_url: 
+kibana_deb_url: 
+
+
+sysd_config_file: /etc/systemd/system/kibana.service
+
+kibana_user: kibana
+kibana_group: kibana
+
+kibana_data_dir: "/var/lib/kibana"
+

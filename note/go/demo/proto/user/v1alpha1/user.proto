@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package demo.user.v1alpha1;
+
+enum Gender {
+    GENDER_INVALID=0;
+    GENDER_MAN=1;
+    GENDER_FEMAN=2;
+}

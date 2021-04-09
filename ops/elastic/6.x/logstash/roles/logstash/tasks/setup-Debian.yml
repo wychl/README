@@ -1,0 +1,48 @@
+---
+
+- name: Include optional user and group creation.
+  when: (logstash_user_id is defined) and (logstash_group_id is defined)
+  include: logstash-optional-user.yml
+
+- name: Debian - Ensure required dependencies are installed.
+  apt:
+    name:
+      - apt-transport-https
+      - gnupg2
+    state: present
+
+- name: Debian - Install logstash repository
+  when: logstash_use_repository
+  become: yes
+  block:
+  - name: Add Elasticsearch apt key.
+    apt_key:
+      url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+  - name: Add Logstash repository.
+    apt_repository:
+      repo: 'deb https://artifacts.elastic.co/packages/{{ logstash_version }}/apt stable main'
+      state: present
+      update_cache: true
+
+- name: Debian - Install Logstash from url
+  become: yes
+  apt:
+    deb: "{% if logstash_custom_package_url is defined %}{{ logstash_custom_package_url }}{% else %}{{ logstash_deb_url }}{% endif %}"
+    state: present
+  when: not logstash_use_repository
+  register: logstash_install_from_url
+  notify: restart logstash
+
+- name: Debian - Install Logstash.
+  when: logstash_use_repository
+  apt:
+    name: logstash
+    state: present
+
+- name: Debian - Add Logstash user to adm group (Debian).
+  user:
+    name: logstash
+    group: logstash
+    groups: adm
+  notify: restart logstash

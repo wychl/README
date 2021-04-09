@@ -1,0 +1,9 @@
+{
+    "server":"server address",
+    "server_port":0,
+    "local_port":0,
+    "local_address":"127.0.0.1",
+    "password":"passwd",
+    "method": "aes-256-cfb",
+    "timeout":300
+}

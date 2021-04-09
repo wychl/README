@@ -1,0 +1,3 @@
+p, alice, /users/1, GET
+p, bob, /users/2, GET
+p ,super, /users/*, GET

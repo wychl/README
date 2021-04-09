@@ -1,0 +1,12 @@
+{
+    
+     
+    "server": "127.0.0.1",
+    "server_port": 48959,
+    "password": "6b4876ea",
+    "method": "aes-256-cfb",
+    "timeout": 600,
+
+"local_port": 1080,
+"local_address": "127.0.0.1"
+}

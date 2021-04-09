@@ -1,0 +1,29 @@
+global: #全局配置，定义全局的公共参数，如全局的SMTP配置，Slack配置等内容
+  resolve_timeout: 5m #定义了当Alertmanager持续多长时间未接收到告警后标记告警状态为resolved（已解决）
+  smtp_from: xxxx #配置smtp
+  smtp_smarthost: smtp.exmail.qq.com:465
+  smtp_hello: 192.168.1.102
+  smtp_auth_username: xxxx
+  smtp_auth_password: xxxxx
+  smtp_require_tls: false
+
+route: #路由，根据标签匹配，确定当前告警应该如何处理
+  group_by: ['alertname'] #分组依据
+  group_wait: 10s #第一次等待多久时间发送一组警报的通知
+  group_interval: 10s #在发送新警报前的等待时间
+  repeat_interval: 5s #发送重复警报的周期 对于email配置中，此项不可以设置过低，否则将会由于邮件发送太多频繁，被smtp服务器拒绝
+  receiver: 'webhook' #发送警报的接收者的名称，以下receivers name的名称
+
+receivers: #接收器，抽象的概念，它可以是一个邮箱也可以是微信，Slack或者Webhook等，接收人一般配合告警路由使用；
+- name: 'webhook'
+  webhook_configs:
+  - url: 'http://192.168.1.102:5001/'
+- name: 'email'  # 路由中对应的receiver名称
+  email_configs: # 邮箱配置
+  - to: 'xxxx'   # 接收警报的email配置
+inhibit_rules: #合理设置抑制规则可以减少垃圾告警的产生
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance'] 

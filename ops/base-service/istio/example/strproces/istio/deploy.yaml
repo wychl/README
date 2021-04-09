@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: processer
+    service: processer
+  name: processer
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: processer
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: processer-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: processer
+        version: v1
+    spec:
+      containers:
+      - image: wanyanchengli/processer:v1
+        imagePullPolicy: Always
+        name: processer
+        ports:
+        - containerPort: 8080
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: processer-v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: processer
+        version: v2
+    spec:
+      containers:
+      - image: wanyanchengli/processer:v2
+        imagePullPolicy: Always
+        name: processer
+        ports:
+        - containerPort: 8080          
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: processer-v3
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: processer
+        version: v3
+    spec:
+      containers:
+      - image: wanyanchengli/processer:v3
+        imagePullPolicy: Always
+        name: processer
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ui
+    service: ui
+  name: ui
+spec:
+  ports:
+  - name: http
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: ui
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ui-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ui
+        version: v1
+    spec:
+      containers:
+      - image: wanyanchengli/ui:v1
+        imagePullPolicy: Always
+        name: ui
+        ports:
+        - containerPort: 9090        
+---
+       

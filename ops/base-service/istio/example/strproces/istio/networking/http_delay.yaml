@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: processer
+spec:
+  hosts:
+  - processer
+  http:
+  - fault:
+      delay:
+        fixedDelay: 5s
+        percent: 100
+    match:
+    - headers:
+        user:
+          exact: zhangsan
+    route:
+    - destination:
+        host: processer
+        subset: v2
+  - route:
+    - destination:
+        host: processer
+        subset: v2

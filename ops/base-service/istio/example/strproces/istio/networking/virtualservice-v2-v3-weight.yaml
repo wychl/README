@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: processer
+spec:
+  hosts:
+  - processer
+  http:
+  - route:
+    - destination:
+        host: processer
+        subset: v2
+      weight: 30  
+    - destination:
+        host: processer
+        subset: v3
+      weight: 70  
+---

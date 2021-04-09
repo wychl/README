@@ -1,0 +1,41 @@
+---
+- name: Include optional user and group creation.
+  when: (kibana_user_id is defined) and (kibana_group_id is defined)
+  include: kibana-optional-user.yml
+
+- name: Ensure dependencies are installed.
+  apt:
+    name:
+      - apt-transport-https
+      - gnupg2
+    state: present
+- name: Install kibana repository
+  when: kibana_use_repository
+  become: yes
+  block:
+  - name:  Debian - Add Elasticsearch apt key.
+    apt_key:
+      url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+  - name:  Debian - Add Kibana repository.
+    apt_repository:
+      repo: 'deb https://artifacts.elastic.co/packages/{{ kibana_version }}/apt stable main'
+      state: present
+      update_cache: true
+
+- name: Debian - Install Kibana.
+  when: kibana_use_repository
+  package:
+    name: "{{ kibana_package }}"
+    state: "{{ kibana_package_state }}"
+  register: kibana_install_from_repository
+  notify: restart kibana
+
+- name: Debian - Install Kibana from url
+  become: yes
+  apt:
+    deb: "{% if kibana_custom_package_url is defined %}{{ kibana_custom_package_url }}{% else %}{{ kibana_deb_url }}{% endif %}"
+    state: present
+  when: not kibana_use_repository
+  register: kibana_install_from_url
+  notify: restart kibana

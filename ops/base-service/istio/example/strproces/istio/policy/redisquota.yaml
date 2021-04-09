@@ -1,0 +1,71 @@
+apiVersion: "config.istio.io/v1alpha2"
+kind: redisquota
+metadata:
+  name: handler
+  namespace: istio-system
+spec:
+  redisServerUrl: redis.istio-system:6379 #redis地址
+  connectionPoolSize: 5 #最大闲置连接数
+  quotas:
+  - name: requestcount.quota.istio-system
+    maxAmount: 2 #配额的上限
+    validDuration: 1s #计时窗口
+    bucketDuration: 500ms 
+    rateLimitAlgorithm: ROLLING_WINDOW #FIXED_WINDOW,ROLLING_WINDOW
+    overrides:
+    - dimensions:
+        destination: processer.default.svc.cluster.local
+      maxAmount: 2
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: quota
+metadata:
+  name: requestcount
+  namespace: istio-system
+spec:
+  dimensions:
+    source: request.headers["x-forwarded-for"] | "unknown"
+    destination: destination.labels["app"] | destination.workload.name | "unknown"
+    destinationVersion: destination.labels["version"] | "unknown"
+---
+#rule 通知 Mixer，使用 Instance requestcount.quota 构建对象并传递给上面创建的 handler.memquota。
+#这一过程使用 quota 模板将 dimensions 数据映射给 memquota 进行处理。
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  name: quota
+  namespace: istio-system
+spec:
+  actions:
+  - handler: handler.redisquota
+    instances:
+    - requestcount.quota
+---
+#QuotaSpec创建的quota实例（requstcount）设置charge值为1。
+apiVersion: config.istio.io/v1alpha2
+kind: QuotaSpec
+metadata:
+  name: request-count
+  namespace: istio-system
+spec:
+  rules:
+  - quotas:
+    - charge: 1
+      quota: requestcount
+---
+#QuotaSpecBinding将QuotaSpec绑定到需要应用限流的服务上。
+#因为 QuotaSpecBinding所属命名空间和这些服务是不一致的，所以这里必须定义每个服务的 namespace。
+apiVersion: config.istio.io/v1alpha2
+kind: QuotaSpecBinding
+metadata:
+  name: request-count
+  namespace: istio-system
+spec:
+  quotaSpecs:
+  - name: request-count
+    namespace: istio-system
+  services:
+  - name: processer
+    namespace: default
+  - service: processer  # Uncomment this to bind *all* services to request-count
+---

@@ -1,0 +1,17 @@
+- name: kibana
+  hosts: kibana
+  roles:
+    - kibana
+  vars:
+    kibana_version: 6.8.4
+    kibana_server_port: 5601
+    kibana_server_host: 0.0.0.0
+    kibana_elasticsearch_username: xxx
+    kibana_elasticsearch_password: xxx
+    kibana_config_dir: /data/kibana/config
+    kibana_config_file_path: /data/kibana/config/kibana.yml
+    kibana_elasticsearch_url: http://127.0.0.1:9200
+    # 使用rpm包安装
+    kibana_use_repository: false
+    kibana_custom_package_url: "https://mirrors.huaweicloud.com/kibana/6.8.4/kibana-6.8.4-x86_64.rpm"
+    kibana_data_dir: /data/kibana/data

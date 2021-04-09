@@ -1,0 +1,72 @@
+
+#路由配置
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hello-world
+spec:
+  gateways:
+  - helloworld-gateway
+  hosts:
+  - '*'
+# 根据规则筛选http请求
+# 字符串三种匹配方式
+# exact: "value" 精确匹配
+# prefix: "value" 前缀匹配
+# regex: "value" 正则匹配
+#---------------------------------- 
+# 如果条件出现在单独的匹配子句中，则条件为 OR
+#  - match:
+#    - sourceLabels:
+#        app: reviews
+#        version: v2
+#      headers:
+#        end-user:
+#          exact: jason
+# 如果多个条件嵌套在单个匹配子句中，则条件为 AND。
+#  - match:
+#    - sourceLabels:
+#        app: reviews
+#        version: v2
+#    - headers:
+#        end-user:
+#          exact: jason
+  http:
+  - match:
+    - uri: #URI的匹配
+        exact: xxx
+      scheme: #URI的模式匹配
+        exact: http     
+      method: #http方法匹配
+        exact: POST     
+      authority:
+        exact: xxx
+      headers: #Header的键必须是小写的，使用连字符作为分隔符
+        test-header-key:
+          exact: xxx
+      sourceLabels:
+        app: demo
+      gateways: #这一字段会覆盖VirtualService自身的gateways设置
+        - xxx
+    redirect: #请求重定向
+      uri: /xxx 
+      authority: xxx  #替换认证值
+    rewrite: HTTP请求被转发到目标之前，对请求内容进行部分改写
+      uri: /xxx #改写uri
+      authority: xxx  #替换认证值
+    timeout: 10s #请求的超时设置
+    route:
+    - destination: #根据路由规则，流量所最终流向的服务
+        host: helloworld
+        subset: v1
+      weight: 100 #转发给特定服务版本的流量占总流量的百分比
+    retries: #HTTP请求失败时的重试策略
+      attempts: 3 #重试次数
+      perTryTimeout: 2s  #每次重试的超时时间,可选单位：小时（h）、分钟（m）、秒钟（s）以及毫秒（ms）
+    fault: 
+      abort: #注入“终止请求”错误
+        percent: 10 #取值范围在0-100，指定中断请求的比例
+        httpStatus: 400 #返回给客户端的HTTP错误代码
+      delay: #注入请求延迟
+        percent: 10 #取值范围在0-100，指定注入延迟的比例
+        fixedDelay: 5s #延迟时间。可选单位：小时（h）、分钟（m）、秒钟（s）以及毫秒（ms）。    

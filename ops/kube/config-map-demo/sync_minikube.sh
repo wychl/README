@@ -1,0 +1,1 @@
+docker save demo:1.0 | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -i ~/.minikube/machines/minikube/id_rsa docker@$(minikube ip) docker load

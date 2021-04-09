@@ -1,0 +1,13 @@
+FROM centos:7 AS downloader
+
+ RUN yum install -y wget \
+    && yum install -y tar \
+    && wget https://github.com/shadowsocks/shadowsocks-rust/releases/download/v1.7.0/shadowsocks-v1.7.0-nightly.x86_64-unknown-linux-musl.tar.xz \
+    && xz -d shadowsocks-v1.7.0-nightly.x86_64-unknown-linux-musl.tar.xz \
+    && tar -xvf shadowsocks-v1.7.0-nightly.x86_64-unknown-linux-musl.tar
+    
+FROM alpine:3.7
+RUN apk --no-cache add ca-certificates
+COPY --from=downloader sslocal /usr/bin/
+VOLUME /etc/shadowsocks.json
+CMD sslocal -c /etc/shadowsocks.json

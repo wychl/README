@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: imagebuilder-github
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: provisioner
+        image: alpine/git
+        args:
+        - clone 
+        - https://github.com/jpillora/chisel
+        - /makisu-context
+        volumeMounts:
+        - name: context
+          mountPath: /makisu-context
+      containers:
+      - name: makisu
+        image: gcr.io/makisu-project/makisu:v0.1.4
+        imagePullPolicy: IfNotPresent
+        args:
+        - build
+        - --push=index.docker.io
+        - --modifyfs=true
+        - -t=wanyanchengli/example-github:v0.1.4
+        - --registry-config=/registry-config/registry.yaml
+        - --redis-cache-addr=redis:6379
+        - /makisu-context
+        volumeMounts:
+        - name: context
+          mountPath: /makisu-context
+        - name: registry-config
+          mountPath: /registry-config
+        - name: storage
+          mountPath: /makisu-storage
+      volumes:
+      - name: context
+        emptyDir: {}
+      - name: registry-config
+        secret:
+          secretName: docker-registry-config
+      - name: storage
+        emptyDir: {}

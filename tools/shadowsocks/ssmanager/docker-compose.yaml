@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  shadowsocks-libev:
+    image: shadowsocks/shadowsocks-libev
+    volumes:
+      - ./shadowsocks-libev/config.json:/etc/shadowsocks-libev/config.json
+    ports:
+      - '8888:8888'
+    restart: always

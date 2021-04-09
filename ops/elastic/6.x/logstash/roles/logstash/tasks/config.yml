@@ -1,0 +1,90 @@
+---
+
+#Add the logstash user before installing from packages.
+- name: Ensure optional logstash group is created with the correct id.
+  become: yes
+  group:
+    state: present
+    name: "{{ logstash_group }}"
+    system: yes
+
+
+- name: Ensure optional logstash user is created with the correct id.
+  become: yes
+  #Restart if these change
+  notify: restart logstash
+  user:
+    state: present
+    name: "{{ logstash_user }}"
+    comment: logstash system user
+    system: yes
+    createhome: no
+    group: "{{ logstash_group }}"
+
+#Create conf directory
+- name: Create Configuration Directory
+  become: yes
+  file:
+    path: "/etc/logstash/conf.d/"
+    state: directory
+    owner: root
+    group: "{{ logstash_group }}"
+    mode: "2750"
+
+#Create required directories
+- name: Create Others Directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: "2750"
+  with_items:
+    - "{{logstash_dir}}"
+    - "/var/lib/logstash"
+
+- name: Create Logstash configuration files.
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+    owner: root
+    group: "{{ logstash_group }}"
+    mode: "644"
+    force: yes
+  with_items:
+    - 01-beats-input.conf
+    - 30-elasticsearch-output.conf
+  notify: restart logstash
+
+- name: Create Logstash filters.
+  copy:
+    src: "filters/{{ item }}"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+    owner: root
+    group: "{{ logstash_group }}"
+    mode: "644"
+    force: yes
+  with_items:
+    - 10-syslog.conf
+    - 11-nginx.conf
+    - 12-apache.conf
+    - 15-drupal.conf
+  notify: restart logstash
+
+- name: Create Logstash configuration file for local syslog.
+  template:
+    src: 02-local-syslog-input.conf.j2
+    dest: /etc/logstash/conf.d/02-local-syslog-input.conf
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+  when: logstash_monitor_local_syslog
+  notify: restart logstash
+
+- name: Ensure configuration for local syslog is absent if disabled.
+  file:
+    path: /etc/logstash/conf.d/02-local-syslog-input.conf
+    state: absent
+  when: not logstash_monitor_local_syslog
+  notify: restart logstash

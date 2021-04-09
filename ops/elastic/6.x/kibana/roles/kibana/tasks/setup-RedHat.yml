@@ -1,0 +1,33 @@
+---
+- name: Include optional user and group creation.
+  when: (kibana_user_id is defined) and (kibana_group_id is defined)
+  include: kibana-optional-user.yml
+
+- name: RedHat -Install kibana repository
+  when: kibana_use_repository
+  become: yes
+  block:
+  - name: RedHat -Add Elasticsearch GPG key.
+    rpm_key:
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+  - name: RedHat -Add Kibana repository.
+    template:
+      src: kibana.repo.j2
+      dest: /etc/yum.repos.d/kibana.repo
+      mode: 0644
+- name: RedHat - Ensure Kibana is started and enabled at boot.
+  when: kibana_use_repository
+  service:
+    name: kibana
+    state: "{{ kibana_service_state }}"
+    enabled: "{{ kibana_service_enabled }}"
+
+- name: RedHat - Install Kibana from url
+  become: yes
+  yum:
+    name: '{% if kibana_custom_package_url is defined %}{{ kibana_custom_package_url }}{% else %}{{ kibana_rpm_url }}{% endif %}'
+    state: present
+  when: not kibana_use_repository
+  register: kibana_install_from_package
+  notify: restart kibana

@@ -1,0 +1,38 @@
+# 流量行为配置
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: helloworld
+spec:
+  host: helloworld   
+  trafficPolicy: #定义默认的流量的访问策略
+    loadBalancer: #负载均衡配置
+      simple: LEAST_CONN #负载均衡模式 LEAST_CONN(随机选择两个健康的主机，将请求路由到请求较少的示例) ROUND_ROBIN(循环，默认配置值) RANDOM(随机访问) PASSTHROUGH
+    connectionPool: #上游主机的连接池设置
+      tcp: #对HTTP和TCP 都有效。
+        maxConnections: 100 #连接数上限为100
+        connectTimeout: 30ms #连接超时限制为30毫秒
+      http:
+        http2MaxRequests: 1000 #1000个并发请求
+        maxRequestsPerConnection: 10 #每个连接不能超过10请求的连接池       
+    corsPolicy: #跨域访问资源策略
+      allowOrigin: #允许的访问的域名列表
+      - xxx.com
+      allowMethods: #允许的http方法列表
+      - POST
+      allowCredentials: false #是否允许调用者携带认证信息对资源发起实际请求
+      allowHeaders: #可以使用的http header列表
+      - X-Foo-Bar
+      maxAge: "1d" #可以缓存预检请求结果的有效期
+    outlierDetection: #熔断器,对每个上游服务主机进行追踪。HTTP和TCP服务都可以生效
+      consecutiveErrors: 7 #超过这一错误数量之后，主机将会被移出连接池。缺省值为 5
+      interval: 5m #在移除检测之间的时间间隔。缺省值为 10s
+      baseEjectionTime: 15m  #最小的移除时间长度
+      maxEjectionPercent: 20 #上游服务的负载均衡池中允许被移除的主机的最大百分比    
+  subsets:
+  - name: v1 #定义名称为v1的子集，集合：version值为v1的pod
+    labels: 
+      version: v1
+    trafficPolicy: #子集访问策略
+      loadBalancer:
+        simple: ROUND_ROBIN              

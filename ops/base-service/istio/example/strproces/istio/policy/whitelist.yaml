@@ -1,0 +1,28 @@
+apiVersion: config.istio.io/v1alpha2
+kind: listchecker
+metadata:
+  name: whitelistip
+spec:
+  overrides: ["195.168.0.60"]
+  blacklist: false
+  entryType: IP_ADDRESSES
+  
+---
+apiVersion: config.istio.io/v1alpha2
+kind: listentry
+metadata:
+  name: sourceip
+spec:
+  value: source.ip | ip("0.0.0.0")
+
+---
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  name: checkip
+spec:
+  match: source.labels["istio"] == "ingressgateway"
+  actions:
+  - handler: whitelistip.listchecker
+    instances:
+    - sourceip.listentry  

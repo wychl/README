@@ -1,0 +1,38 @@
+global: #全局配置
+  scrape_interval:     15s  #采取的频率
+  evaluation_interval: 15s #规则过滤的频率
+  
+remote_write:
+  - url: "http://192.168.1.102:8086/api/v1/prom/write?db=prometheus&u=prometheus&p=prometheus"
+remote_read:
+  - url: "http://192.168.1.102:8086/api/v1/prom/read?db=prometheus&u=prometheus&p=prometheus"
+
+
+scrape_configs: #抓取任务列表
+  - job_name: prometheus #监控prometheus
+    static_configs:
+      - targets: ['localhost:9090'] #抓取任务的HTTP地址，默认会在 /metrics url 进行抓取
+  - job_name: myapp
+    scrape_interval: 1s
+    static_configs:
+    - targets:
+      - 127.0.0.1:2112
+
+  - job_name: 'example-random'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.1.102:8080']
+        labels:
+          group: 'production'
+      - targets: ['192.168.1.102:8082']
+        labels:
+          group: 'canary'
+
+# rule配置，首次读取默认加载，之后根据evaluation_interval设定的周期加载
+rule_files:
+  - /etc/prometheus/rules/*.rules
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets: ["192.168.1.102:9093"] #配置Prometheus来和AlertManager通信

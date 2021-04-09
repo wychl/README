@@ -1,0 +1,13 @@
+{
+    "servers": [
+        {
+            "address": "server_ip",
+            "port": 0000,
+            "password": "server password",
+            "method": "aes-256-cfb",
+            "timeout": 600
+        }
+    ],
+    "local_port": 1080,
+    "local_address": "127.0.0.1"
+}

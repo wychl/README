@@ -1,0 +1,15 @@
+---
+
+- include: config.yml
+- include: ssl.yml
+
+- name: Include OS Specific setup tasks
+  include: setup-{{ ansible_os_family }}.yml
+
+- name: Cconfig Gem source
+  ansible.builtin.lineinfile:
+    path: "{{logstash_dir}}/Gemfile"
+    regexp: '^source'
+    line: 'source "{{ logstash_gem_source }}"'
+
+- include: plugins.yml

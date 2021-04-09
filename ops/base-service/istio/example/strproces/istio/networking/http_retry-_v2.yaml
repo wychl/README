@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: processer
+spec:
+  hosts:
+  - processer
+  http:
+  - route:
+    - destination:
+        host: processer
+        subset: v2
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: gateway-error,connect-failure,refused-stream    

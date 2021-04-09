@@ -1,0 +1,15 @@
+- name: logstash
+  hosts: logstash
+  roles:
+    - logstash
+  vars:
+    logstash_version: 6.x
+    logstash_elasticsearch_hosts: ["http://127.0.0.1:9200"]
+    logstash_use_repository: false
+    logstash_custom_package_url: "https://mirrors.huaweicloud.com/logstash/6.8.4/logstash-6.8.4.rpm"
+    logstash_elasticsearch_username: xxx
+    logstash_elasticsearch_password: xxx
+    logstash_listen_port_beats: 5044
+    logstash_gem_source: https://ruby.taobao.org/
+    logstash_install_plugins: # 安装的插件
+      - logstash-input-beats

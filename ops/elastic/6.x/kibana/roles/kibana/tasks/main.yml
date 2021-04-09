@@ -1,0 +1,61 @@
+---
+#Create conf directory
+- name: Create Configuration Directory
+  become: yes
+  file:
+    path: "{{ kibana_config_dir }}"
+    state: directory
+    owner: root
+    group: "{{ kibana_group }}"
+    mode: "2750"
+
+#Create required directories
+- name: Create Others Directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: "2750"
+  with_items:
+    - "{{ kibana_data_dir }}"
+
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+#Copy the systemd specific file if systemd is installed
+- name: Config systemd configuration
+  become: yes
+  block:
+    - name: Make sure destination dir exists
+      file:
+        path: "{{ sysd_config_file | dirname }}"
+        state: directory
+        mode: "755"
+
+    - name: Copy specific Kibana Systemd config file
+      template:
+        src: "kibana.service.j2"
+        dest: "{{ sysd_config_file }}"
+        owner: root
+        group: "{{ kibana_group }}"
+        mode: "644"
+        force: yes
+      notify:
+       - reload systemd configuration
+       - restart kibana
+
+- name: Copy Kibana configuration.
+  template:
+    src: "{{ kibana_config_template }}"
+    dest: "{{ kibana_config_file_path }}"
+    owner: root
+    group: "{{ kibana_group }}"
+    mode: "660"
+    force: yes
+  register: system_change
+  notify: restart kibana

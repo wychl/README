@@ -1,0 +1,10 @@
+output {
+  elasticsearch {
+    hosts => {{ logstash_elasticsearch_hosts | to_json }}
+    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+    {% if logstash_elasticsearch_username and logstash_elasticsearch_password %}
+    user=> {{ logstash_elasticsearch_username }}
+    password=> {{ logstash_elasticsearch_password }}
+    {% endif %}
+  }
+}

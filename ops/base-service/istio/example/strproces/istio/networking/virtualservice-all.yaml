@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ui
+spec:
+  gateways:
+  - str-gateway
+  hosts:
+  - "*"
+  http:
+  - match:
+    - uri: 
+        prefix: /ui   
+    route:
+    - destination:
+        host: ui
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: processer
+spec:
+  hosts:
+  - processer
+  http:
+  - route:
+    - destination:
+        host: processer
+---

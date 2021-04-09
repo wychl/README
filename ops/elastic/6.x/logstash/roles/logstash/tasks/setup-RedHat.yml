@@ -1,0 +1,41 @@
+---
+- name: Include optional user and group creation.
+  when: (logstash_user_id is defined) and (logstash_group_id is defined)
+  include: logstash-optional-user.yml
+  
+- name: RedHat -Install logstash repository
+  when: logstash_use_repository
+  become: yes
+  block:
+  - name: Add Elasticsearch GPG key.
+    rpm_key:
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+  - name: Add Logstash repository.
+    template:
+      src: logstash.repo.j2
+      dest: /etc/yum.repos.d/logstash.repo
+      mode: 0644
+
+- name: RedHat -Install Logstash.
+  when: logstash_use_repository
+  package:
+    name: logstash
+    state: present
+  notify: restart logstash
+
+- name: RedHat - Ensure Logstash is started and enabled at boot.
+  when: logstash_use_repository
+  service:
+    name: logstash
+    state: "{{ logstash_service_state }}"
+    enabled: "{{ logstash_service_enabled }}"
+
+- name: RedHat - Install Logstash from url
+  become: yes
+  yum:
+    name: '{% if logstash_custom_package_url is defined %}{{ logstash_custom_package_url }}{% else %}{{ logstash_rpm_url }}{% endif %}'
+    state: present
+  when: not logstash_use_repository
+  register: logstash_install_from_package
+  notify: restart logstash
