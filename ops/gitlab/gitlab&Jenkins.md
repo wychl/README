@@ -10,13 +10,19 @@
 
 点击icon进入配置页面
 
+![](images/gitlab_config_entry.png)
+
 ### 第二步进入用户新建页面
 
 现在配置页面首先点击`用户`->然后点击`新用户`，进入用户新建页面
 
+![](images/gitlab_config.png)
+
 ### 第三步
 
 用户新建页面配置账号
+
+![](images/gitlab_user_form.png)
 
 ### 激活账号
 
@@ -28,15 +34,23 @@
 
 ### 第一步进入配置页面
 
+![](images/genkins_admin_config.png)
+
 #### 第二步
 
 点击`凭据`->点击`.global`进入凭据加入页面
+
+![](images/jenkins_global_config.png)
 
 ### 第三步
 
 点击`Add Credentials`
 
+![](images/add_credentials.png)
+
 ### 配置 `Credentials`
+
+![](images/add_credentials_form.png)
 
 需要编辑的参数如下
 
